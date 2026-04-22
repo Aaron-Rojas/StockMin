@@ -19,6 +19,7 @@ export default function VentasDia({ fecha, monto }) {
 const styles = StyleSheet.create({
   container: {
     marginBottom: 25,
+    paddingTop:20
   },
   title: {
     fontSize: 18,
