@@ -1,13 +1,13 @@
 import { SafeAreaView, ScrollView, View, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React from 'react';
 
 import VentasDia from '../components/VentasDia.jsx';
 import FastButtons from '../components/FastButtons.jsx';
 import ViewStock from '../components/ViewStock.jsx';
 import NavBar from '../components/NavBar.jsx';
 
-export default function HomeScreen() {
-  const [activeRoute, setActiveRoute] = useState('home');
+export default function HomeScreen({ onNavigate }) {
+  // const [activeRoute, setActiveRoute] = useState('home');
 
   const listaProductos = [
     { nombre: 'Agua', cantidad: '3' },
@@ -29,7 +29,7 @@ export default function HomeScreen() {
         <ViewStock productos={listaProductos} />
       </ScrollView>
 
-      <NavBar activeRoute={activeRoute} setActiveRoute={setActiveRoute} />
+      <NavBar activeRoute="home" setActiveRoute={onNavigate} />
       
     </SafeAreaView>
   );

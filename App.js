@@ -3,24 +3,25 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import InventarioScreen from './src/screens/InventarioScreen';
 
 export default function App() {
 
  const [currentScreen, setCurrentScreen] = useState('login');
  
- //Función para translado
- const irAHome = () => {
-    setCurrentScreen('home');
-  }
-  const irALogin = () => {
-    setCurrentScreen('login');
+ const navegarA = (ruta) => {
+    setCurrentScreen(ruta);
   };
 
-  if (currentScreen === 'login') {
-    return <LoginScreen onLogin={irAHome} />;
-  } else {
-    return <HomeScreen onLogout={irALogin} />;
+ //Función para translado
+ if (currentScreen === 'login') {
+    return <LoginScreen onLogin={() => navegarA('home')} />;
+  } else if (currentScreen === 'home') {
+    return <HomeScreen onNavigate={navegarA} />;
+  } else if (currentScreen === 'inventario') {
+    return <InventarioScreen onNavigate={navegarA} />;
   }
+
   
   return (
   <LoginScreen/>
