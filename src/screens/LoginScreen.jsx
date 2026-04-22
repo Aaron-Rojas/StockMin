@@ -5,9 +5,10 @@ import FormLog from '../components/FormLog';
 import TabButtons from '../components/TabButtons';
 import ConfirmButton from '../components/ConfirmButton';
 
-export default function LoginScreen() {
+export default function LoginScreen({onLogin}) {
   
   const [activeTab, setActiveTab] = useState('registro');
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');    
@@ -45,7 +46,7 @@ export default function LoginScreen() {
 
           <ConfirmButton 
             title="Confirmar" 
-            onPress={manejarConfirmacion} 
+            onPress={onLogin} 
           />
 
         </ScrollView>
