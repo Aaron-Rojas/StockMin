@@ -22,8 +22,8 @@ export default function HomeScreen({ onNavigate }) {
         <VentasDia fecha="Miercoles, 22 Abril 2026" monto="70" />
         
         <FastButtons 
-          onIngreso={() => console.log("Ir a ingreso")}
-          onVentas={() => console.log("Ir a ventas")}
+          onIngreso={() => onNavigate('ingresoProducto')}
+          onVentas={() => onNavigate('salidaProducto')}
         />
 
         <ViewStock productos={listaProductos} />
