@@ -1,9 +1,9 @@
 import { View, Image, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import React, {useState} from 'react'
 
-import FormLog from '../components/FormLog';
-import TabButtons from '../components/TabButtons';
-import ConfirmButton from '../components/ConfirmButton';
+import FormLog from '../components/forms/FormLog';
+import TabButtons from '../components/ui/TabButtons';
+import ConfirmButton from '../components/ui/ConfirmButton';
 
 export default function LoginScreen({onLogin}) {
   
