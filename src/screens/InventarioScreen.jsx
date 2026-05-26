@@ -1,12 +1,12 @@
 import { SafeAreaView, ScrollView, View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 
-import InventarioTitle from '../components/InventarioTitle';
-import TabInventario from '../components/TabInventario';
-import CardEntradaInventario from '../components/CardEntradaInventario';
+import InventarioTitle from '../components/home/InventarioTitle';
+import TabInventario from '../components/inventario/TabInventario';
+import CardEntradaInventario from '../components/inventario/CardEntradaInventario';
 
-import NavBar from '../components/NavBar';
-import CardSalidaInvetario from '../components/CardSalidaInvetario';
+import NavBar from '../components/ui/NavBar';
+import CardSalidaInvetario from '../components/inventario/CardSalidaInvetario';
 
 export default function InventarioScreen({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('entrada');

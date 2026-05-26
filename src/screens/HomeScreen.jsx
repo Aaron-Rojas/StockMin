@@ -1,10 +1,10 @@
 import { SafeAreaView, ScrollView, View, StyleSheet } from 'react-native';
 import React from 'react';
 
-import VentasDia from '../components/VentasDia.jsx';
-import FastButtons from '../components/FastButtons.jsx';
-import ViewStock from '../components/ViewStock.jsx';
-import NavBar from '../components/NavBar.jsx';
+import VentasDia from '../components/home/VentasDia.jsx';
+import FastButtons from '../components/ui/FastButtons.jsx';
+import ViewStock from '../components/products/ViewStock.jsx';
+import NavBar from '../components/ui/NavBar.jsx';
 
 export default function HomeScreen({ onNavigate }) {
   // const [activeRoute, setActiveRoute] = useState('home');

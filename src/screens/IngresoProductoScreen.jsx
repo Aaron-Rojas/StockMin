@@ -1,9 +1,9 @@
 import { SafeAreaView, ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
 
-import HeaderBack from '../components/HeaderBack';
-import FormIngreso from '../components/FormIngreso';
-import ActionButtons from '../components/ActionButtons';
+import HeaderBack from '../components/ui/HeaderBack';
+import FormIngreso from '../components/forms/FormIngreso';
+import ActionButtons from '../components/ui/ActionButtons';
 
 export default function IngresoProductoScreen({ onNavigate }) {
   const [nombre, setNombre] = useState('');

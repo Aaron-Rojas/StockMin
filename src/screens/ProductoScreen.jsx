@@ -1,10 +1,10 @@
 import { SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 
-import ProductTitle from '../components/ProductTitle';
-import ProductSearch from '../components/ProductSearch';
-import CardProduct from '../components/CardProduct';
-import NavBar from '../components/NavBar';
+import ProductTitle from '../components/products/ProductTitle';
+import ProductSearch from '../components/forms/ProductSearch';
+import CardProduct from '../components/products/CardProduct';
+import NavBar from '../components/ui/NavBar';
 
 export default function ProductoScreen({ onNavigate }) {
   const [busqueda, setBusqueda] = useState('');

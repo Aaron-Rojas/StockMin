@@ -1,9 +1,9 @@
 import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
 
-import HeaderBack from '../components/HeaderBack';
-import ProductSearch from '../components/ProductSearch';
-import FormVenta from '../components/FormVenta';
+import FormVentas from '../components/forms/FormVenta';
+import ProductSearch from '../components/forms/ProductSearch';
+import HeaderBack from '../components/ui/HeaderBack';
 
 export default function SalidaProductoScreen({ onNavigate }) {
   const [busqueda, setBusqueda] = useState('');
@@ -28,7 +28,7 @@ export default function SalidaProductoScreen({ onNavigate }) {
 
           <ProductSearch busqueda={busqueda} setBusqueda={setBusqueda} />  
 
-          <FormVenta 
+          <FormVetas
             nombre={nombre} setNombre={setNombre}
             cantidad={cantidad} setCantidad={setCantidad}
             total={totalSimulado}
