@@ -28,7 +28,7 @@ export default function SalidaProductoScreen({ onNavigate }) {
 
           <ProductSearch busqueda={busqueda} setBusqueda={setBusqueda} />  
 
-          <FormVetas
+          <FormVentas
             nombre={nombre} setNombre={setNombre}
             cantidad={cantidad} setCantidad={setCantidad}
             total={totalSimulado}

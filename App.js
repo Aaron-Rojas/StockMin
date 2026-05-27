@@ -30,6 +30,7 @@ function MainTabs(){
 // La Pila Principal (Stack)
 export default function App() {
   return (
+      // Solo se nombras los screen luego serán utilizado por "Replace"
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }} >
         {/* Pantallas base */}
