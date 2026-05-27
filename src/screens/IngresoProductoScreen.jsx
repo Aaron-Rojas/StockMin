@@ -5,7 +5,7 @@ import HeaderBack from '../components/ui/HeaderBack';
 import FormIngreso from '../components/forms/FormIngreso';
 import ActionButtons from '../components/ui/ActionButtons';
 
-export default function IngresoProductoScreen({ onNavigate }) {
+export default function IngresoProductoScreen({ navigation }) {
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
   const [stock, setStock] = useState('');
@@ -14,14 +14,14 @@ export default function IngresoProductoScreen({ onNavigate }) {
   const manejarGuardado = () => {
     console.log("Guardando:", { nombre, precio, stock, proveedor });
     // Después de guardar, regresamos al Home
-    onNavigate('home');
+    navigation.goBack();
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         
-        <HeaderBack onBack={() => onNavigate('home')} />
+        <HeaderBack onBack={() => navigation.goBack()} />
         
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.mainTitle}>Ingreso de Producto</Text>
@@ -34,7 +34,7 @@ export default function IngresoProductoScreen({ onNavigate }) {
           />
 
           <ActionButtons 
-            onCancel={() => onNavigate('home')} 
+            onCancel={() => navigation.goBack()} 
             onSave={manejarGuardado} 
           />
         </ScrollView>

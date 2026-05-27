@@ -49,10 +49,6 @@ export default function InventarioScreen({ onNavigate }) {
 
       </ScrollView>
 
-      <NavBar 
-        activeRoute="inventario" 
-        setActiveRoute={onNavigate} 
-      />
       
     </SafeAreaView>
   );
