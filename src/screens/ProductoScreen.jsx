@@ -1,4 +1,4 @@
-import { SafeAreaView, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, ActivityIndicator} from 'react-native';
 import React, { useState } from 'react';
 
 import ProductTitle from '../components/products/ProductTitle';
@@ -6,8 +6,14 @@ import ProductSearch from '../components/forms/ProductSearch';
 import CardProduct from '../components/products/CardProduct';
 import NavBar from '../components/ui/NavBar';
 
-export default function ProductoScreen({ onNavigate }) {
+//Importamos nuestro hooks a usar
+import { useProductos } from '../hooks/useProductos';
+
+export default function ProductoScreen({ navigation }) {
   const [busqueda, setBusqueda] = useState('');
+
+  //Extramoes lo que usará el hook
+  const { productos, cargando, error } = useProductos();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -19,13 +25,23 @@ export default function ProductoScreen({ onNavigate }) {
           busqueda={busqueda} 
           setBusqueda={setBusqueda} 
         />
+
+        {/* Pantalla de Carga  */}
+        {cargando && <ActivityIndicator size="large" color="#4A1C20" />}
         
-        <CardProduct 
-          titulo="Chanka Kichachi" 
-          precio="45" 
-          stock="9" 
-          imagenUrl="https://chanka-kichachi.web.app/wp-content/uploads/2025/03/Chanka-Kichachi-625ml-1-1024x682.png" 
-        />
+        {/* Si en caso, falla */}
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
+        {!cargando && !error && productos.map((item) => (
+              <CardProduct 
+                key={item.id}
+                titulo={item.nombre} 
+                precio={item.precio} 
+                stock={item.stock} 
+                imagenUrl={item.imagenUrl} 
+              />
+            ))}
+        
 
       </ScrollView>
 
@@ -40,5 +56,11 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingBottom: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginTop: 20,
   }
 });
