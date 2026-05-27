@@ -19,5 +19,69 @@
     "precio": "1.20",
     "stock": 24,
     "imagenUrl": "https://static.vecteezy.com/system/resources/thumbnails/073/578/262/small/assortment-of-gourmet-chocolate-truffles-fills-entire-frame-photo.jpeg"
+  },
+    {
+    "id": "4",
+    "nombre": "Agua San Luis 750ml",
+    "precio": "3.50",
+    "stock": 15,
+    "imagenUrl":"https://vegaperu.vtexassets.com/arquivos/ids/165124-1200-auto?v=638285811808570000&width=1200&height=auto&aspect=true"
+  },
+  {
+    "id": "5",
+    "nombre": "Chanka Kichachi 625ml",
+    "precio": "4.50",
+    "stock": 9,
+    "imagenUrl": "https://chanka-kichachi.web.app/wp-content/uploads/2025/03/Chanka-Kichachi-625ml-1-1024x682.png"
+  },
+  {
+    "id": "6",
+    "nombre": "Trufas",
+    "precio": "1.20",
+    "stock": 24,
+    "imagenUrl": "https://static.vecteezy.com/system/resources/thumbnails/073/578/262/small/assortment-of-gourmet-chocolate-truffles-fills-entire-frame-photo.jpeg"
+  },
+    {
+    "id": "7",
+    "nombre": "Agua San Luis 750ml",
+    "precio": "3.50",
+    "stock": 15,
+    "imagenUrl":"https://vegaperu.vtexassets.com/arquivos/ids/165124-1200-auto?v=638285811808570000&width=1200&height=auto&aspect=true"
+  },
+  {
+    "id": "8",
+    "nombre": "Chanka Kichachi 625ml",
+    "precio": "4.50",
+    "stock": 9,
+    "imagenUrl": "https://chanka-kichachi.web.app/wp-content/uploads/2025/03/Chanka-Kichachi-625ml-1-1024x682.png"
+  },
+  {
+    "id": "9",
+    "nombre": "Trufas",
+    "precio": "1.20",
+    "stock": 24,
+    "imagenUrl": "https://static.vecteezy.com/system/resources/thumbnails/073/578/262/small/assortment-of-gourmet-chocolate-truffles-fills-entire-frame-photo.jpeg"
+  }
+  ,
+    {
+    "id": "10",
+    "nombre": "Agua San Luis 750ml",
+    "precio": "3.50",
+    "stock": 15,
+    "imagenUrl":"https://vegaperu.vtexassets.com/arquivos/ids/165124-1200-auto?v=638285811808570000&width=1200&height=auto&aspect=true"
+  },
+  {
+    "id": "11",
+    "nombre": "Chanka Kichachi 625ml",
+    "precio": "4.50",
+    "stock": 9,
+    "imagenUrl": "https://chanka-kichachi.web.app/wp-content/uploads/2025/03/Chanka-Kichachi-625ml-1-1024x682.png"
+  },
+  {
+    "id": "12",
+    "nombre": "Trufas",
+    "precio": "1.20",
+    "stock": 24,
+    "imagenUrl": "https://static.vecteezy.com/system/resources/thumbnails/073/578/262/small/assortment-of-gourmet-chocolate-truffles-fills-entire-frame-photo.jpeg"
   }
 ]
