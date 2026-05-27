@@ -4,8 +4,9 @@ import React, {useState} from 'react'
 import FormLog from '../components/forms/FormLog';
 import TabButtons from '../components/ui/TabButtons';
 import ConfirmButton from '../components/ui/ConfirmButton';
+import HomeScreen from './HomeScreen';
 
-export default function LoginScreen({onLogin}) {
+export default function LoginScreen({ navigation}) {
   
   const [activeTab, setActiveTab] = useState('registro');
   
@@ -46,7 +47,7 @@ export default function LoginScreen({onLogin}) {
 
           <ConfirmButton 
             title="Confirmar" 
-            onPress={onLogin} 
+            onPress={() => navigation.replace('MainTabs')} 
           />
 
         </ScrollView>

@@ -1,40 +1,45 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+// Importes de navegación
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
+// Importes de Pantallas
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import InventarioScreen from './src/screens/InventarioScreen';
 import ProductoScreen from './src/screens/ProductoScreen';
-
 import IngresoProductoScreen from './src/screens/IngresoProductoScreen';
 import SalidaProductoScreen from './src/screens/SalidaProductoScreen';
 
+// Variables para la navegación 
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+// Las Islas 
+function MainTabs(){
+  return(
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Inventario" component={InventarioScreen} />
+      <Tab.Screen name="Producto" component={ProductoScreen} />
+    </Tab.Navigator>
+  )
+}
+
+// La Pila Principal (Stack)
 export default function App() {
-
- const [currentScreen, setCurrentScreen] = useState('login');
- 
- const navegarA = (ruta) => {
-    setCurrentScreen(ruta);
-  };
-
- //Función para translado
-if (currentScreen === 'login') {
-    return <LoginScreen onLogin={() => navegarA('home')} />;
-  } else if (currentScreen === 'home') {
-    return <HomeScreen onNavigate={navegarA} />;
-  } else if (currentScreen === 'inventario') {
-    return <InventarioScreen onNavigate={navegarA} />;
-  } else if (currentScreen === 'producto') {
-    return <ProductoScreen onNavigate={navegarA} />;
-  }else if (currentScreen === 'ingresoProducto') {  
-    return <IngresoProductoScreen onNavigate={navegarA} />;
-  }else if (currentScreen === 'salidaProducto') {  
-    return <SalidaProductoScreen onNavigate={navegarA} />;
-  }
-
-  
   return (
-  <LoginScreen/>
-  //  <HomeScreen/>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }} >
+        {/* Pantallas base */}
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+        
+        {/* Pantallas que se enciman (Formularios) */}
+        <Stack.Screen name="IngresoProducto" component={IngresoProductoScreen} />
+        <Stack.Screen name="SalidaProducto" component={SalidaProductoScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

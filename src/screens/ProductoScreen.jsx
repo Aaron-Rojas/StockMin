@@ -29,10 +29,6 @@ export default function ProductoScreen({ onNavigate }) {
 
       </ScrollView>
 
-      <NavBar 
-        activeRoute="producto" 
-        setActiveRoute={onNavigate} 
-      />
     </SafeAreaView>
   );
 }
