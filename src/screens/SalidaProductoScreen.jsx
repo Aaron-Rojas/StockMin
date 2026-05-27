@@ -5,7 +5,7 @@ import FormVentas from '../components/forms/FormVenta';
 import ProductSearch from '../components/forms/ProductSearch';
 import HeaderBack from '../components/ui/HeaderBack';
 
-export default function SalidaProductoScreen({ onNavigate }) {
+export default function SalidaProductoScreen({ navigation }) {
   const [busqueda, setBusqueda] = useState('');
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
@@ -14,14 +14,14 @@ export default function SalidaProductoScreen({ onNavigate }) {
 
   const manejarGuardado = () => {
     console.log("Venta guardada:", { busqueda, nombre, cantidad });
-    onNavigate('home');
+    navigation.goBack();
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flexContainer}>
         
-        <HeaderBack onBack={() => onNavigate('home')} />
+        <HeaderBack onBack={() => navigation.goBack()} />
         
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.mainTitle}>Registro de venta</Text>
@@ -35,7 +35,7 @@ export default function SalidaProductoScreen({ onNavigate }) {
           />
 
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={[styles.button, styles.btnCancel]} onPress={() => onNavigate('home')}>
+            <TouchableOpacity style={[styles.button, styles.btnCancel]} onPress={() => navigation.goBack()}>
               <Text style={styles.textBtn}>Cancelar</Text>
             </TouchableOpacity>
 
