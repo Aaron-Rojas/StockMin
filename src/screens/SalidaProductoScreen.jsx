@@ -1,21 +1,53 @@
-import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState } from 'react';
+import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
 
 import FormVentas from '../components/forms/FormVenta';
 import ProductSearch from '../components/forms/ProductSearch';
 import HeaderBack from '../components/ui/HeaderBack';
 
 export default function SalidaProductoScreen({ navigation }) {
-  const [busqueda, setBusqueda] = useState('');
-  const [nombre, setNombre] = useState('');
+  const [busqueda, setBusqueda] = useState('')
+
+  const [nombre, setNombre] = useState('Chanka Kichachi 625ml'); 
   const [cantidad, setCantidad] = useState('');
-  
-  const totalSimulado = "15";
+  const [precio, setPrecio] = useState(4.50); 
+  const [total, setTotal] = useState(0);
+
+
+  const cantidadNum = parseInt(cantidad) || 0;
+  //lógica de Inventario
+  useEffect( () =>{
+    const nuevoTotal = cantidadNum * precio;
+    setTotal(nuevoTotal)
+  }
+ ,[cantidad,precio]);
 
   const manejarGuardado = () => {
-    console.log("Venta guardada:", { busqueda, nombre, cantidad });
+    if(cantidadNum <=0){
+      Alert.alert(
+        "Atención ⚠️",
+        "Por favor, ingresa una cantidad válida mayor a 0 antes de guardar.",
+        [{ text: "Entendido", style: "cancel" }]
+      );
+      return; 
+    }
+
+    Alert.alert(
+      "Venta Exitosa ✅",
+      `Se registró la salida de ${cantidadNum} unidades de ${nombre}.\n\nIngreso total: S/ ${total.toFixed(2)}`,
+      [
+        { 
+          text: "OK", 
+          onPress: () => navigation.goBack() 
+        }
+      ]
+    ); 
+
+    console.log(`Se vendieron ${cantidad} unidades de ${nombre}. Ingreso total: S/ ${total.toFixed(2)}`);
     navigation.goBack();
   };
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -29,9 +61,11 @@ export default function SalidaProductoScreen({ navigation }) {
           <ProductSearch busqueda={busqueda} setBusqueda={setBusqueda} />  
 
           <FormVentas
-            nombre={nombre} setNombre={setNombre}
-            cantidad={cantidad} setCantidad={setCantidad}
-            total={totalSimulado}
+          nombre={nombre}
+          setNombre={setNombre}
+          cantidad={cantidad}
+          setCantidad={setCantidad}
+          total={total.toFixed(2)}
           />
 
           <View style={styles.actionButtons}>
