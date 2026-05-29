@@ -1,11 +1,15 @@
 import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react';
+import React,{useState,useEffect} from 'react';
+import { useAuth } from '../hooks/useAuth.js';
 
 import VentasDia from '../components/home/VentasDia.jsx';
 import FastButtons from '../components/ui/FastButtons.jsx';
 import ViewStock from '../components/products/ViewStock.jsx';
 
 export default function HomeScreen({ navigation }) {
+  
+  const [usuario, setUsuario] = useState('');
+  const { obtenerSesion, cerrarSesion } = useAuth();
 
   const listaProductos = [
     { nombre: 'Agua', cantidad: '3' },
@@ -13,14 +17,33 @@ export default function HomeScreen({ navigation }) {
     { nombre: 'Camacho', cantidad: '1' },
   ];
 
+
+  useEffect(() => {
+    const cargarUsuario = async () => {
+      const emailGuardado = await obtenerSesion();
+      if (emailGuardado) setUsuario(emailGuardado);
+    };
+    cargarUsuario();
+  }, []);
+
+  const manejarLogout = async () => {
+    await cerrarSesion(); 
+    navigation.replace('Login');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       
       <View style={styles.headerBar}>
+        
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#4A1C20' }}>
+          Hola, {usuario || 'Usuario'}
+        </Text>
+
         <View style={styles.placeholder} />
         <TouchableOpacity 
           style={styles.logoutButton} 
-          onPress={() => navigation.replace('Login')}
+          onPress={manejarLogout}
         >
           <Text style={styles.logoutText}>Cerrar Sesión </Text>
         </TouchableOpacity>
