@@ -33,7 +33,7 @@ export default function SalidaProductoScreen({ navigation }) {
     }
 
     Alert.alert(
-      "Venta Exitosa ✅",
+      "Venta Exitosa",
       `Se registró la salida de ${cantidadNum} unidades de ${nombre}.\n\nIngreso total: S/ ${total.toFixed(2)}`,
       [
         { 
