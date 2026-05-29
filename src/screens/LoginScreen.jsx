@@ -1,25 +1,36 @@
 import { View, Image, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 
 import FormLog from '../components/forms/FormLog';
 import TabButtons from '../components/ui/TabButtons';
 import ConfirmButton from '../components/ui/ConfirmButton';
 import HomeScreen from './HomeScreen';
 
+import { useAuth } from '../hooks/useAuth';
+
 export default function LoginScreen({ navigation}) {
   
-  const [activeTab, setActiveTab] = useState('registro');
+  const [activeTab, setActiveTab] = useState('login');
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');    
   
-  const manejarConfirmacion = () => {
-    console.log("Datos capturados:", email, password, phone);
-  };
+  const {iniciarSesion, obtenerSesion} = useAuth();
+
+  useEffect(() => {
+    const revisarLogeo = async () => {
+      const emailGuardado = await obtenerSesion();
+      if (emailGuardado) {
+        console.log('Usuario detectado en memoria, saltando al Home:', emailGuardado);
+        navigation.replace('MainTabs');
+      }
+    };
+    revisarLogeo();
+  }, []);
 
   //Función para validar
-  const validarYContinuar = () => {
+  const validarYContinuar = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert("Campos incompletos ", "El correo y la contraseña son obligatorios.");
       return;
@@ -45,9 +56,10 @@ export default function LoginScreen({ navigation}) {
         Alert.alert("Teléfono inválido", "El número de teléfono debe tener al menos 9 dígitos.");
         return;
         }  
-
-      navigation.replace('MainTabs');
     }
+      await iniciarSesion(email);
+      
+      navigation.replace('MainTabs');
   }
 
   return (
