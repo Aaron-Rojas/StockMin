@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: '#803B43',
     borderRadius: 20,
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     padding: 20,
     elevation: 4,
     marginBottom: 20,
@@ -40,12 +40,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 32,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
   price: {
-    fontSize: 28,
+
+    fontSize: 25,
     fontWeight: 'bold',
     color: '#EAD05C',
   },
