@@ -29,23 +29,58 @@ Para garantizar la modularidad, un alto rendimiento visual y dejar el terreno pr
         ├── /inventario    # Componentes para el flujo de movimientos 
         └── /products      # Componentes del catálogo y tarjetas de stock crítico
 ```
-# Instalar un proyecto en React-Native
-Instalar React-Native
+
+## 🚀 Guía de Instalación y Despliegue
+
+### Clonar y ejecutar el repositorio existente
+Si ya cuentas con el repositorio y deseas levantar el entorno localmente, ejecuta:
+
+1. Clonar el repositorio:
+```bash
+git clone https://github.com/Aaron-Rojas/StockMin
+```
+
+2. Instalar todas las dependencias del proyecto:
+```bash
+npm install
+```
+
+---
+
+### Construcción del proyecto desde cero (Comandos de referencia)
+En caso de requerir levantar un entorno idéntico desde cero, estos fueron los comandos utilizados en la arquitectura:
+
+1. Crear el proyecto base en Expo:
 ```bash
 npx create-expo-app stockmin-app --template blank
 ```
-Instalar la navegación entre pantallas
+
+2. Instalación del núcleo de navegación:
 ```bash 
-# Instalación del núcleo de navegación
 npm install @react-navigation/native
-# Instalación de dependencias nativas optimizadas para pantallas en Expo
+```
+
+3. Instalación de dependencias nativas optimizadas para pantallas en Expo:
+```bash
 npx expo install react-native-screens react-native-safe-area-context
-# Instalación del enrutador de tipo Stack 
+```
+
+4. Instalación del enrutador de tipo Stack (Pilas):
+```bash
 npm install @react-navigation/native-stack
-# Instalación del enrutador de tipo Bottom Tabs 
+```
+
+5. Instalación del enrutador de tipo Bottom Tabs (Pestañas inferiores):
+```bash
 npm install @react-navigation/bottom-tabs
 ```
-Soporte para el entorno Web
+
+6. Instalación de AsyncStorage:
+```bash
+npx expo install @react-native-async-storage/async-storage
+```
+
+7. Soporte para visualización en el entorno Web:
 ```bash
 npx expo install react-native-web react-dom @expo/metro-runtime
 ```
