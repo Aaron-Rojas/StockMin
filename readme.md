@@ -49,6 +49,10 @@ npm install
 
 ### Construcción del proyecto desde cero (Comandos de referencia)
 En caso de requerir levantar un entorno idéntico desde cero, estos fueron los comandos utilizados en la arquitectura:
+```bash
+npx expo start -c 
+```
+0. Ejecutar el un proyecto
 
 1. Crear el proyecto base en Expo:
 ```bash
