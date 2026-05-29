@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { View, Image, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native'
 import React, {useState} from 'react'
 
 import FormLog from '../components/forms/FormLog';
@@ -18,6 +18,37 @@ export default function LoginScreen({ navigation}) {
     console.log("Datos capturados:", email, password, phone);
   };
 
+  //Función para validar
+  const validarYContinuar = () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert("Campos incompletos ", "El correo y la contraseña son obligatorios.");
+      return;
+    }
+
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Correo inválido ", "Por favor ingresa un correo electrónico válido (ejemplo@correo.com).");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Contraseña débil ", "La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    if (activeTab === 'registro') {
+      if (!phone.trim()) {
+        Alert.alert("Teléfono faltante ", "El número de teléfono es obligatorio para registrarse.");
+        return;
+      }
+      if (phone.length < 9) {
+        Alert.alert("Teléfono inválido", "El número de teléfono debe tener al menos 9 dígitos.");
+        return;
+        }  
+
+      navigation.replace('MainTabs');
+    }
+  }
 
   return (
 <SafeAreaView style={styles.safeArea}>
@@ -47,7 +78,7 @@ export default function LoginScreen({ navigation}) {
 
           <ConfirmButton 
             title="Confirmar" 
-            onPress={() => navigation.replace('MainTabs')} 
+            onPress={() => validarYContinuar()} 
           />
 
         </ScrollView>
