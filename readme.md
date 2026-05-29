@@ -50,42 +50,42 @@ npm install
 ### Construcción del proyecto desde cero (Comandos de referencia)
 En caso de requerir levantar un entorno idéntico desde cero, estos fueron los comandos utilizados en la arquitectura:
 
-0. Ejecutar el un proyecto
+1. Ejecutar el un proyecto
 ```bash
 npx expo start -c 
 ```
 
-1. Crear el proyecto base en Expo:
+2. Crear el proyecto base en Expo:
 ```bash
 npx create-expo-app stockmin-app --template blank
 ```
 
-2. Instalación del núcleo de navegación:
+3. Instalación del núcleo de navegación:
 ```bash 
 npm install @react-navigation/native
 ```
 
-3. Instalación de dependencias nativas optimizadas para pantallas en Expo:
+4. Instalación de dependencias nativas optimizadas para pantallas en Expo:
 ```bash
 npx expo install react-native-screens react-native-safe-area-context
 ```
 
-4. Instalación del enrutador de tipo Stack (Pilas):
+5. Instalación del enrutador de tipo Stack (Pilas):
 ```bash
 npm install @react-navigation/native-stack
 ```
 
-5. Instalación del enrutador de tipo Bottom Tabs (Pestañas inferiores):
+6. Instalación del enrutador de tipo Bottom Tabs (Pestañas inferiores):
 ```bash
 npm install @react-navigation/bottom-tabs
 ```
 
-6. Instalación de AsyncStorage:
+7. Instalación de AsyncStorage:
 ```bash
 npx expo install @react-native-async-storage/async-storage
 ```
 
-7. Soporte para visualización en el entorno Web:
+8. Soporte para visualización en el entorno Web:
 ```bash
 npx expo install react-native-web react-dom @expo/metro-runtime
 ```
