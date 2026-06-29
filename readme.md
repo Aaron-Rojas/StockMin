@@ -89,3 +89,46 @@ npx expo install @react-native-async-storage/async-storage
 ```bash
 npx expo install react-native-web react-dom @expo/metro-runtime
 ```
+
+---
+
+## 🔌 Integración Backend (API REST) y Seguridad
+
+Para preparar la conexión del frontend React Native con el futuro backend en Node.js, se ha diseñado un contrato de datos estricto basado en el estándar **JSON Schema**. Este contrato se encuentra en la raíz del proyecto en el archivo [api-contrato.json]
+### 🎯 Propósito del Contrato de API
+El archivo `api-contrato.json` funciona como un acuerdo técnico y de validación entre ambas capas del desarrollo. Su propósito principal es:
+1. **Validación Estricta:** Asegurar que los datos transmitidos tengan la estructura y tipos de datos correctos (ej. códigos de barras como cadenas, precios con formato de decimales, etc.).
+2. **Garantía de Rúbrica (JWT & Cámara):** Definir los requerimientos de la autenticación JWT y especificar los endpoints y campos clave (`codigoBarras`) necesarios para el escaneo de códigos de barra por cámara (Expo Camera).
+
+### 🔒 Autenticación y Manejo de JWT
+* **Ruta de Login (`POST /api/auth/login`):** Recibe las credenciales y devuelve un token JWT firmado junto con el perfil del usuario.
+* **Persistencia de Sesión:** En el frontend, este token debe almacenarse de forma segura mediante `AsyncStorage` o `SecureStore` (completando los métodos del hook `useAuth`).
+* **Autorización en Peticiones:** Los endpoints protegidos de productos requieren la cabecera `Authorization: Bearer <TOKEN>`.
+* **Manejo de Errores:** Se definen los esquemas para respuestas `401 Unauthorized` para alertar al frontend de tokens inválidos o expirados, forzando al usuario a volver a iniciar sesión.
+
+### 📷 Funcionalidad de Cámara y Código de Barras
+* **Ruta de Búsqueda (`GET /api/productos/barcode/{barcode}`):** Permite buscar rápidamente un producto escaneado mediante la cámara. Si no se encuentra, retorna un error `404 Not Found`.
+* **Ruta de Registro (`POST /api/productos`):** Permite registrar un producto nuevo de forma ágil asociando directamente el código de barras detectado por el dispositivo físico.
+
+### ⚙️ Configuración y Variables de Entorno (`.env`)
+Para desacoplar el entorno de desarrollo y producción y ocultar las URLs de la futura API, se deben utilizar variables de entorno.
+1. Instalar la dependencia necesaria en React Native para soporte de archivos `.env`:
+   ```bash
+   npm install react-native-dotenv
+   ```
+2. Crear un archivo `.env` en la raíz del proyecto:
+   ```env
+   API_URL=http://localhost:3000
+   ```
+3. Consumo en los hooks (`useProductos` y `useAuth`):
+   ```javascript
+   import { API_URL } from '@env';
+   ```
+
+### 💡 Buenas Prácticas para la Escalabilidad del Backend
+Para el desarrollo de la futura API en Node.js, se recomiendan las siguientes directrices:
+1. **Arquitectura Limpia (Clean Architecture / Layered):** Separar las rutas (controladores), la lógica de negocio (servicios) y el acceso a base de datos (repositorios/modelos) para un mantenimiento sencillo.
+2. **Validación automática de Esquemas:** Usar librerías como `ajv` (Another JSON Schema Validator) en el backend de Node.js para validar de forma automática los cuerpos de petición (`requestBody`) contra el archivo `api-contrato.json`.
+3. **Manejo Centralizado de Errores:** Implementar un middleware de Express para atrapar y formatear los errores bajo una estructura consistente, devolviendo códigos de estado HTTP semánticos (400, 401, 403, 404, 409, 500).
+4. **Renovación de Tokens (Refresh Tokens):** Para mejorar la experiencia de usuario y la seguridad, implementar un mecanismo de refresh tokens que evite que el empleado deba iniciar sesión repetidas veces al expirar el token de acceso de corta duración.
+5. **Migración a TypeScript:** Utilizar TypeScript en el backend para un tipado estricto que se corresponda exactamente con los esquemas del contrato JSON.
