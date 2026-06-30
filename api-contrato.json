@@ -501,6 +501,262 @@
           }
         }
       }
+    },
+    "movimientos": {
+      "listar": {
+        "path": "/api/movimientos",
+        "method": "GET",
+        "description": "Obtiene la lista de movimientos de inventario agrupados por fecha (fechaDia, fechaMes). Soporta filtro por tipo de movimiento (entrada o salida). Requiere token JWT en las cabeceras.",
+        "headers": {
+          "type": "object",
+          "properties": {
+            "Authorization": {
+              "type": "string",
+              "pattern": "^Bearer\\s[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$",
+              "description": "Cabecera de autorización Bearer Token conteniendo el JWT."
+            }
+          },
+          "required": [
+            "Authorization"
+          ]
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "enum": [
+                "entrada",
+                "salida"
+              ],
+              "description": "Filtro para listar solo entradas o solo salidas."
+            }
+          },
+          "additionalProperties": false
+        },
+        "response": {
+          "success": {
+            "status": 200,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fechaDia": {
+                    "type": "string",
+                    "description": "Día relativo (ej: 'Hoy', 'Ayer', 'Lunes')."
+                  },
+                  "fechaMes": {
+                    "type": "string",
+                    "description": "Día y mes formateado (ej: '22 de Abril')."
+                  },
+                  "cantidadTotal": {
+                    "type": "string",
+                    "description": "Suma total de productos movilizados ese día en formato string."
+                  },
+                  "productos": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "nombre": {
+                          "type": "string",
+                          "description": "Nombre del producto movilizado."
+                        },
+                        "cantidad": {
+                          "type": "string",
+                          "description": "Cantidad de productos del movimiento."
+                        },
+                        "hora": {
+                          "type": "string",
+                          "description": "Hora formateada del movimiento (ej: '16:35 pm')."
+                        }
+                      },
+                      "required": [
+                        "nombre",
+                        "cantidad",
+                        "hora"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "fechaDia",
+                  "fechaMes",
+                  "cantidadTotal",
+                  "productos"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "errorUnauthorized": {
+            "status": 401,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "Mensaje de error de autenticación.",
+                  "example": "Token expirado o inválido."
+                }
+              },
+              "required": [
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "crear": {
+        "path": "/api/movimientos",
+        "method": "POST",
+        "description": "Registra una nueva transacción de movimiento (entrada o salida) para un producto. Captura el ID del usuario directamente desde el JWT en las cabeceras.",
+        "headers": {
+          "type": "object",
+          "properties": {
+            "Authorization": {
+              "type": "string",
+              "pattern": "^Bearer\\s[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$",
+              "description": "Cabecera de autorización Bearer Token conteniendo el JWT."
+            }
+          },
+          "required": [
+            "Authorization"
+          ]
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "enum": [
+                "entrada",
+                "salida"
+              ],
+              "description": "Tipo de movimiento de inventario."
+            },
+            "cantidad": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Cantidad de unidades a mover (ingresar/vender)."
+            },
+            "productoId": {
+              "type": "string",
+              "description": "ID del producto al que se le aplica el movimiento."
+            },
+            "proveedor": {
+              "type": "string",
+              "description": "Nombre del proveedor (obligatorio para entrada/ingreso)."
+            }
+          },
+          "required": [
+            "tipo",
+            "cantidad",
+            "productoId"
+          ],
+          "additionalProperties": false
+        },
+        "response": {
+          "success": {
+            "status": 201,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ID del movimiento registrado en la base de datos."
+                },
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "entrada",
+                    "salida"
+                  ]
+                },
+                "cantidad": {
+                  "type": "integer"
+                },
+                "productoId": {
+                  "type": "string"
+                },
+                "usuarioId": {
+                  "type": "string",
+                  "description": "ID del usuario autenticado que realiza el movimiento (extraído del token)."
+                },
+                "proveedor": {
+                  "type": "string",
+                  "description": "Proveedor asociado al movimiento (solo en entradas)."
+                },
+                "fecha": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Fecha y hora en que se registró el movimiento."
+                }
+              },
+              "required": [
+                "id",
+                "tipo",
+                "cantidad",
+                "productoId",
+                "usuarioId",
+                "fecha"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "errorBadRequest": {
+            "status": 400,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "Descripción del error (ej. stock insuficiente para una salida).",
+                  "example": "Stock insuficiente para realizar la venta."
+                }
+              },
+              "required": [
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "errorNotFound": {
+            "status": 404,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "El producto especificado no existe."
+                }
+              },
+              "required": [
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "errorUnauthorized": {
+            "status": 401,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "error"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
     }
   }
 }

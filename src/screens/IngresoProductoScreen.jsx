@@ -1,20 +1,49 @@
-import { SafeAreaView, ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView, ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 
 import HeaderBack from '../components/ui/HeaderBack';
 import FormIngreso from '../components/forms/FormIngreso';
 import ActionButtons from '../components/ui/ActionButtons';
+import { useProductos } from '../hooks/useProductos';
 
 export default function IngresoProductoScreen({ navigation }) {
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
   const [stock, setStock] = useState('');
   const [proveedor, setProveedor] = useState('');
+  const [codigoBarras, setCodigoBarras] = useState('');
 
-  const manejarGuardado = () => {
-    console.log("Guardando:", { nombre, precio, stock, proveedor });
-    // Después de guardar, regresamos al Home
-    navigation.goBack();
+  // CÓMO: Extraer el método crearProducto y el estado cargando de useProductos.
+  // POR QUÉ: Permite interactuar asíncronamente con el backend de producción para insertar el catálogo.
+  const { crearProducto, cargando } = useProductos();
+
+  // CÓMO: Validar que todos los campos del payload existan y llamar a crearProducto.
+  // POR QUÉ: Evita registrar productos inválidos y bloquea flujos de navegación si ocurre un error de base de datos.
+  const manejarGuardado = async () => {
+    if (!nombre.trim() || !precio.trim() || !stock.trim() || !codigoBarras.trim()) {
+      Alert.alert("Campos incompletos ⚠️", "Por favor completa el nombre, precio, stock y código de barras.");
+      return;
+    }
+
+    const payload = {
+      nombre,
+      precio,
+      stock,
+      codigoBarras,
+      proveedor
+    };
+
+    const respuesta = await crearProducto(payload);
+    if (respuesta && respuesta.exito) {
+      Alert.alert("Guardado Exitoso", `Se registró el producto ${nombre} correctamente.`);
+      navigation.goBack();
+    } else {
+      Alert.alert("Error de Registro ⚠️", respuesta?.error || "Ocurrió un problema de red.");
+    }
+  };
+
+  const abrirEscaner = () => {
+    Alert.alert("Cámara 📷", "Funcionalidad de escaneo por cámara próximamente.");
   };
 
   return (
@@ -26,16 +55,22 @@ export default function IngresoProductoScreen({ navigation }) {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.mainTitle}>Ingreso de Producto</Text>
 
+          {cargando && (
+            <ActivityIndicator size="large" color="#6A2E35" style={{ marginBottom: 15 }} />
+          )}
+
           <FormIngreso 
             nombre={nombre} setNombre={setNombre}
             precio={precio} setPrecio={setPrecio}
             stock={stock} setStock={setStock}
             proveedor={proveedor} setProveedor={setProveedor}
+            codigoBarras={codigoBarras} setCodigoBarras={setCodigoBarras}
+            onScanPress={abrirEscaner}
           />
 
           <ActionButtons 
             onCancel={() => navigation.goBack()} 
-            onSave={manejarGuardado} 
+            onSave={cargando ? () => {} : manejarGuardado} 
           />
         </ScrollView>
         
@@ -50,7 +85,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4EFEA', 
-    paddingTop:25
+    paddingTop: 25
   },
   scrollContainer: {
     paddingBottom: 20,

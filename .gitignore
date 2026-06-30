@@ -42,3 +42,4 @@ yarn-error.*
 
 #Contexto
 rubrica_*.md
+.env

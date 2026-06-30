@@ -90,6 +90,11 @@ npx expo install @react-native-async-storage/async-storage
 npx expo install react-native-web react-dom @expo/metro-runtime
 ```
 
+9. Instalación de la librería de cámara nativa para lectura de códigos de barra:
+```bash
+npx expo install expo-camera
+```
+
 ---
 
 ## 🔌 Integración Backend (API REST) y Seguridad
@@ -109,6 +114,15 @@ El archivo `api-contrato.json` funciona como un acuerdo técnico y de validació
 ### 📷 Funcionalidad de Cámara y Código de Barras
 * **Ruta de Búsqueda (`GET /api/productos/barcode/{barcode}`):** Permite buscar rápidamente un producto escaneado mediante la cámara. Si no se encuentra, retorna un error `404 Not Found`.
 * **Ruta de Registro (`POST /api/productos`):** Permite registrar un producto nuevo de forma ágil asociando directamente el código de barras detectado por el dispositivo físico.
+* **Integración en Formulario (`FormIngreso.jsx`):** Integra la funcionalidad de escaneo de códigos de barra mediante la cámara nativa utilizando la versión moderna de `expo-camera` (SDK 50+) a través de `<CameraView>`. La gestión de permisos se realiza dinámicamente utilizando el hook `useCameraPermissions()`. Además, el callback `onBarcodeScanned` extrae de manera explícita el string de la propiedad `data` para guardarlo en el estado del formulario, garantizando la consistencia del tipo de dato según lo establecido en `api-contrato.json`.
+
+
+### 📦 Gestión de Movimientos de Inventario (Entradas/Salidas)
+* **Ruta de Listado (`GET /api/movimientos`):** Obtiene los movimientos de inventario agrupados por día para alimentar directamente las vistas de historial en la aplicación. Soporta un parámetro de consulta `?tipo=entrada` o `?tipo=salida` para filtrar las transacciones.
+  * **Estructura Esperada por el Frontend:** Retorna un arreglo de objetos agrupados por día con los campos `fechaDia` (ej. "Hoy"), `fechaMes` (ej. "22 de Abril"), `cantidadTotal` y una lista de `productos` con sus detalles individuales (`nombre`, `cantidad`, `hora`), que encaja de forma directa en las props requeridas por [InventarioScreen.jsx]
+* **Ruta de Registro (`POST /api/movimientos`):** Registra una entrada (ingreso) o salida (venta/merma) de un producto.
+  * **Cuerpo de Petición (`request`):** Exige obligatoriamente `tipo` ("entrada" o "salida"), `cantidad` (mínimo 1) y `productoId`. En el caso de ingresos, acepta de forma opcional el campo `proveedor` capturado en [IngresoProductoScreen.jsx]
+  * **Captura de Usuario de Sesión:** El ID del usuario que registra el movimiento se extrae de manera segura en el backend a partir del token JWT enviado en el header `Authorization`, cumpliendo con estándares de seguridad al no requerir el `usuarioId` en el cuerpo de la petición.
 
 ### ⚙️ Configuración y Variables de Entorno (`.env`)
 Para desacoplar el entorno de desarrollo y producción y ocultar las URLs de la futura API, se deben utilizar variables de entorno.
@@ -132,3 +146,67 @@ Para el desarrollo de la futura API en Node.js, se recomiendan las siguientes di
 3. **Manejo Centralizado de Errores:** Implementar un middleware de Express para atrapar y formatear los errores bajo una estructura consistente, devolviendo códigos de estado HTTP semánticos (400, 401, 403, 404, 409, 500).
 4. **Renovación de Tokens (Refresh Tokens):** Para mejorar la experiencia de usuario y la seguridad, implementar un mecanismo de refresh tokens que evite que el empleado deba iniciar sesión repetidas veces al expirar el token de acceso de corta duración.
 5. **Migración a TypeScript:** Utilizar TypeScript en el backend para un tipado estricto que se corresponda exactamente con los esquemas del contrato JSON.
+
+## 📦 Compilación y Distribución Android (APK sin Expo Go)
+
+### 🎯 Propósito del Despliegue
+Para realizar presentaciones del proyecto en entornos reales (como exposiciones universitarias) y prescindir de la dependencia de Expo Go, se utiliza **EAS Build** (Expo Application Services). Esto permite generar un paquete de aplicación Android instalable de forma nativa (`.apk`) compilado directamente en la nube de Expo.
+
+### ⚙️ Requisitos y Comandos de Preparación
+
+1. **Instalación Global de EAS CLI:**
+   Instala la interfaz de línea de comandos de EAS de forma global en tu máquina:
+   ```bash
+   npm install -g eas-cli
+   ```
+
+2. **Iniciar Sesión en Expo:**
+   Vincula tu terminal con tu cuenta de Expo Developer:
+   ```bash
+   eas login
+   ```
+
+3. **Inicialización y Vinculación del Proyecto:**
+   Genera la conexión entre el código local y los servidores de Expo (esto creará o configurará los identificadores del proyecto):
+   ```bash
+   eas build:configure
+   ```
+
+### 🛠️ Configuración de Compilación (`eas.json`)
+La aplicación cuenta con un archivo `eas.json` en la raíz del proyecto configurado específicamente con un perfil llamado `preview` que cambia el tipo de salida por defecto (`.aab` para Google Play Store) por un paquete instalable `.apk`:
+
+```json
+{
+  "cli": {
+    "version": ">= 10.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {}
+  },
+  "submit": {
+    "production": {}
+  }
+}
+```
+
+### 🚀 Comando de Compilación Nube (Generación de APK)
+Para iniciar la compilación remota de tu archivo `.apk` de prueba, ejecuta el siguiente comando:
+```bash
+eas build --platform android --profile preview
+```
+Al finalizar, la consola y el panel de Expo te proporcionarán un enlace de descarga directa y un código QR para instalar el `.apk` directamente en cualquier teléfono Android compatible.
+
+### 💡 Buenas Prácticas de Escalabilidad en Despliegue
+1. **Versionado Semántico (SemVer):** Incrementa la versión en `version` y `android.versionCode` en [app.json](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/app.json) con cada compilación de prueba para evitar confusiones de caché o problemas al sobrescribir instalaciones anteriores en los dispositivos.
+2. **Uso de Credentials Managers:** Expo gestiona de forma automática los keystores y claves de firmado de Android. En entornos de producción reales, guarda una copia de seguridad de las credenciales de firmado generadas por Expo mediante el comando `eas credentials`.
+3. **Optimización del Tamaño de la App:** Para reducir el peso final del APK, configura en `app.json` los recursos mínimos indispensables y utiliza compresión adecuada en las imágenes ubicadas en `/assets`.

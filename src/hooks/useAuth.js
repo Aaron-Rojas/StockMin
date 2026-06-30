@@ -1,43 +1,62 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-//Variable -> usuarioActivo, en donde se almacená todo
+import { useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import api from '../services/api';
 
 export const useAuth = () => {
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Guardar la sesión
-  const iniciarSesion = async (email) => {
+  // CÓMO: Realizar petición POST con email y password al endpoint de login.
+  // POR QUÉ: Autentica al empleado contra la base de datos de producción y obtiene el JWT y perfil.
+  const iniciarSesion = async (email, password) => {
+    setCargando(true);
+    setError(null);
     try {
-      await AsyncStorage.setItem('usuarioActivo', email);
-      return true;
-    } catch (error) {
-        console.log(`Error al crear un AyncStorage ${error}`);
-      return false;
+      const respuesta = await api.post('/api/auth/login', { email, password });
+      const { token, user } = respuesta.data;
+
+      // CÓMO: Almacenar de forma segura el token y el email en SecureStore.
+      // POR QUÉ: Garantiza la persistencia encriptada de la sesión para futuras peticiones.
+      await SecureStore.setItemAsync('usuarioToken', token);
+      await SecureStore.setItemAsync('usuarioEmail', user.email);
+      
+      return { exito: true, usuario: user };
+    } catch (err) {
+      const mensajeError = err.response?.data?.error || 'Error de conexión con el servidor.';
+      setError(mensajeError);
+      return { exito: false, error: mensajeError };
+    } finally {
+      setCargando(false);
     }
   };
 
-  // Leer la variable Async
+  // CÓMO: Leer la sesión activa desde SecureStore de forma asíncrona.
+  // POR QUÉ: Permite verificar si existe un token persistido para auto-loguear al empleado.
   const obtenerSesion = async () => {
     try {
-      const email = await AsyncStorage.getItem('usuarioActivo');
-      console.log(`Ok, Se guardó en AsyncStorage el usuario:`, {email})
-      return email;
-    } catch (error) {
-      console.log(`Error al leer ${error}`)
+      const token = await SecureStore.getItemAsync('usuarioToken');
+      if (token) {
+        return await SecureStore.getItemAsync('usuarioEmail');
+      }
+      return null;
+    } catch (err) {
+      console.error('Error al recuperar sesión:', err);
       return null;
     }
   };
 
-  // Borrar la sesión
+  // CÓMO: Limpiar los registros de sesión en SecureStore y reiniciar estados.
+  // POR QUÉ: Asegura que al cerrar sesión se borren las credenciales de memoria de forma irreversible.
   const cerrarSesion = async () => {
     try {
-     await AsyncStorage.clear(); 
-      console.log(' Delete, Memoria de AsyncStorage limpiada por completo');
+      await SecureStore.deleteItemAsync('usuarioToken');
+      await SecureStore.deleteItemAsync('usuarioEmail');
       return true;
-    } catch (error) {
-      console.log(`Error al borrar la memoria: ${error}`);
+    } catch (err) {
+      console.error('Error al cerrar sesión:', err);
       return false;
     }
-}
+  };
 
-  return { iniciarSesion, obtenerSesion, cerrarSesion };
+  return { iniciarSesion, obtenerSesion, cerrarSesion, cargando, error };
 };
