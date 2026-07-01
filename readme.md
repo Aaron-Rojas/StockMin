@@ -154,6 +154,11 @@ Para realizar presentaciones del proyecto en entornos reales (como exposiciones 
 
 ### ⚙️ Requisitos y Comandos de Preparación
 
+> [!IMPORTANT]
+> **Recursos de Configuración Requeridos (Assets):**
+> Para evitar errores durante la fase de *Prebuild* en EAS Build (por ejemplo, errores tipo `ENOENT: no such file or directory` relacionados con imágenes), el proyecto debe contener obligatoriamente la carpeta `/assets` en la raíz con las imágenes definidas en [app.json](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/app.json): `icon.png`, `splash-icon.png`, `adaptive-icon.png` y `favicon.png`. Si estos archivos de recursos no existen, la fase de prebuild nativo fallará de forma automática.
+
+
 1. **Instalación Global de EAS CLI:**
    Instala la interfaz de línea de comandos de EAS de forma global en tu máquina:
    ```bash
