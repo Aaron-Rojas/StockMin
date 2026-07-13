@@ -105,11 +105,26 @@ El archivo `api-contrato.json` funciona como un acuerdo técnico y de validació
 1. **Validación Estricta:** Asegurar que los datos transmitidos tengan la estructura y tipos de datos correctos (ej. códigos de barras como cadenas, precios con formato de decimales, etc.).
 2. **Garantía de Rúbrica (JWT & Cámara):** Definir los requerimientos de la autenticación JWT y especificar los endpoints y campos clave (`codigoBarras`) necesarios para el escaneo de códigos de barra por cámara (Expo Camera).
 
-### 🔒 Autenticación y Manejo de JWT
-* **Ruta de Login (`POST /api/auth/login`):** Recibe las credenciales y devuelve un token JWT firmado junto con el perfil del usuario.
-* **Persistencia de Sesión:** En el frontend, este token debe almacenarse de forma segura mediante `AsyncStorage` o `SecureStore` (completando los métodos del hook `useAuth`).
-* **Autorización en Peticiones:** Los endpoints protegidos de productos requieren la cabecera `Authorization: Bearer <TOKEN>`.
-* **Manejo de Errores:** Se definen los esquemas para respuestas `401 Unauthorized` para alertar al frontend de tokens inválidos o expirados, forzando al usuario a volver a iniciar sesión.
+### 🔒 Autenticación, Registro y Persistencia de Sesión (Módulo 1)
+*   **Propósito de la Funcionalidad:** Permitir el registro de nuevos usuarios en el sistema (`POST /api/auth/register`) y la autenticación de usuarios existentes (`POST /api/auth/login`) contra la base de datos central. Además, asegurar la sesión del empleado inyectando automáticamente el JWT en las cabeceras HTTP y controlando de manera segura la expiración del token mediante interceptores de Axios y almacenamiento cifrado.
+*   **Instalación de Dependencias e Inicio del Entorno:**
+    Para que el flujo de autenticación cifrado y las peticiones funcionen, el proyecto requiere `axios` y `expo-secure-store`. Instálelos con los siguientes comandos en la terminal:
+    ```bash
+    npm install axios
+    npx expo install expo-secure-store
+    ```
+    Para iniciar el entorno móvil en modo de desarrollo con variables cargadas desde el archivo `.env`:
+    ```bash
+    npx expo start -c
+    ```
+*   **Componentes Clave Implementados:**
+    1.  [api.js](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/services/api.js) (Modelo): Instancia centralizada de Axios configurada con interceptores para inyectar de forma asíncrona el JWT almacenado en `SecureStore`. Adicionalmente, cuenta con un interceptor de respuesta que limpia las credenciales automáticamente si el servidor responde con un código de error `401 Unauthorized`.
+    2.  [useAuth.js](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/hooks/useAuth.js) (ViewModel): Proveedor de lógica asíncrona que expone los métodos `login`, `register` (para el registro con email, contraseña y nombre completo), `logout` y `checkSession` para la verificación automática al iniciar la app.
+    3.  [LoginScreen.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/screens/LoginScreen.jsx) y [FormLog.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/components/forms/FormLog.jsx) (Vistas): Interfaz reactiva dividida en pestañas para alternar de forma nativa entre el inicio de sesión y el registro del empleado, consumiendo estados reactivos de carga (`cargando`) y errores interactivos (`errorAuth`).
+*   **💡 Buenas Prácticas de Escalabilidad:**
+    1.  **Expiración Automática y Renovación (Refresh Token):** Para futuras integraciones, es recomendable cambiar el flujo de un solo JWT persistente de larga duración por un esquema de `accessToken` (duración corta, 15 min) y `refreshToken` (duración larga, guardado en cookie httpOnly en el backend), actualizando de forma transparente el interceptor de Axios para interceptar el error 401, renovar el token en segundo plano y reintentar la petición original.
+    2.  **Manejo de Roles:** Extender la respuesta del login/registro para almacenar el rol del usuario (ej. `cajero`, `administrador`) y usarlo para bloquear accesos visuales en el enrutamiento de pestañas del frontend de forma dinámica.
+    3.  **Encriptación de Información Sensible:** Evitar almacenar contraseñas o datos personales en el estado global o almacenamiento local común (como AsyncStorage). Toda credencial debe ser guardada exclusivamente de forma encriptada mediante `SecureStore` (Keychain en iOS / Keystore en Android).
 
 ### 📷 Funcionalidad de Cámara y Código de Barras
 * **Ruta de Búsqueda (`GET /api/productos/barcode/{barcode}`):** Permite buscar rápidamente un producto escaneado mediante la cámara. Si no se encuentra, retorna un error `404 Not Found`.

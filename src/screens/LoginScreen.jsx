@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert, Text } from 'react-native';
+import { View, Image, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 
 import FormLog from '../components/forms/FormLog';
@@ -11,15 +11,15 @@ export default function LoginScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');    
+  const [nombre, setNombre] = useState('');    
 
-  // CÓMO: Desestructurar iniciarSesion, obtenerSesion, cargando y error del custom hook.
-  // POR QUÉ: Permite manejar la comunicación con el servidor y dar retroalimentación reactiva en la vista.
-  const { iniciarSesion, obtenerSesion, cargando, error: errorAuth } = useAuth();
+  // CÓMO: Desestructurar login, register, checkSession y cargando de useAuth.
+  // POR QUÉ: Permite autenticar al empleado y registrar nuevas cuentas consumiendo la API de producción.
+  const { login, register, checkSession, cargando } = useAuth();
 
   useEffect(() => {
     const revisarLogeo = async () => {
-      const emailGuardado = await obtenerSesion();
+      const emailGuardado = await checkSession();
       if (emailGuardado) {
         console.log('Usuario detectado en memoria, saltando al Home:', emailGuardado);
         navigation.replace('MainTabs');
@@ -28,41 +28,47 @@ export default function LoginScreen({ navigation }) {
     revisarLogeo();
   }, []);
 
-  // CÓMO: Validar localmente los campos y ejecutar el inicio de sesión enviando email y password.
+  // CÓMO: Validar localmente los campos y ejecutar el inicio de sesión o registro según la pestaña activa.
   // POR QUÉ: Evita peticiones innecesarias al backend y condiciona la navegación al éxito de la API.
   const validarYContinuar = async () => {
     if (cargando) return;
 
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Campos incompletos", "El correo y la contraseña son obligatorios.");
+      Alert.alert("Campos incompletos ⚠️", "El correo y la contraseña son obligatorios.");
       return;
     }
 
     const emailRegex = /\S+@\S+\.\S+/;
     if (!emailRegex.test(email)) {
-      Alert.alert("Correo inválido", "Por favor ingresa un correo electrónico válido (ejemplo@correo.com).");
+      Alert.alert("Correo inválido ⚠️", "Por favor ingresa un correo electrónico válido (ejemplo@correo.com).");
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert("Contraseña débil", "La contraseña debe tener al menos 6 caracteres.");
+      Alert.alert("Contraseña débil ⚠️", "La contraseña debe tener al menos 6 caracteres.");
       return;
     }
 
     if (activeTab === 'registro') {
-      if (!phone.trim()) {
-        Alert.alert("Teléfono faltante", "El número de teléfono es obligatorio para registrarse.");
+      if (!nombre.trim()) {
+        Alert.alert("Nombre faltante ⚠️", "El nombre completo es obligatorio para registrarse.");
         return;
       }
-      if (phone.length < 9) {
-        Alert.alert("Teléfono inválido", "El número de teléfono debe tener al menos 9 dígitos.");
+      if (nombre.trim().length < 3) {
+        Alert.alert("Nombre inválido ⚠️", "El nombre debe tener al menos 3 caracteres.");
         return;
       }  
     }
 
-    // CÓMO: Pasar email y password, evaluando de forma estricta el éxito devuelto por el hook useAuth.
-    // POR QUÉ: Garantiza que la redirección a la app solo se realice bajo credenciales válidas y seguras.
-    const respuesta = await iniciarSesion(email, password);
+    // CÓMO: Llamar a login o register evaluando el éxito del retorno del hook useAuth.
+    // POR QUÉ: Asegura que el usuario sea redirigido a las secciones internas de StockMin solo tras una transacción HTTP exitosa. Las alertas se manejan centralizadamente.
+    let respuesta;
+    if (activeTab === 'registro') {
+      respuesta = await register(email, password, nombre);
+    } else {
+      respuesta = await login(email, password);
+    }
+
     if (respuesta && respuesta.exito) {
       navigation.replace('MainTabs');
     }
@@ -82,29 +88,26 @@ export default function LoginScreen({ navigation }) {
             resizeMode="contain"
           />
 
+          {/* CÓMO: Deshabilitar el cambio de pestaña en TabButtons mientras se ejecuta la petición HTTP. */}
+          {/* POR QUÉ: Evita estados inconsistentes si el usuario intenta interactuar durante la latencia. */}
           <TabButtons 
             activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
+            setActiveTab={cargando ? () => {} : setActiveTab} 
           />
 
           <FormLog 
             activeTab={activeTab}
             email={email} setEmail={setEmail}
             password={password} setPassword={setPassword}
-            phone={phone} setPhone={setPhone}
+            nombre={nombre} setNombre={setNombre}
           />
 
-          {cargando && (
-            <Text style={styles.loadingText}>Iniciando sesión, por favor espere...</Text>
-          )}
-
-          {errorAuth && (
-            <Text style={styles.errorText}>{errorAuth}</Text>
-          )}
-
+          {/* CÓMO: Pasar el prop loading al ConfirmButton. */}
+          {/* POR QUÉ: Centraliza la prevención del doble tap y delega la renderización del ActivityIndicator al botón base. */}
           <ConfirmButton 
             title="Confirmar" 
-            onPress={cargando ? null : () => validarYContinuar()} 
+            onPress={validarYContinuar} 
+            loading={cargando}
           />
 
         </ScrollView>
@@ -133,19 +136,9 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 30,
   },
-  loadingText: {
-    color: '#4A1C20',
-    textAlign: 'center',
-    marginTop: 15,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  errorText: {
-    color: '#B70000',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    marginTop: 15,
-    fontSize: 14,
-    paddingHorizontal: 20,
+  loadingIndicator: {
+    marginTop: 20,
+    marginBottom: 10,
+    alignSelf: 'center',
   }
 });

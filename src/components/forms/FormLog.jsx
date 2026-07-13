@@ -1,7 +1,7 @@
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import React from 'react';
 
-export default function FormLog({ activeTab, email, setEmail, password, setPassword, phone, setPhone }) {
+export default function FormLog({ activeTab, email, setEmail, password, setPassword, nombre, setNombre }) {
   return (
     <View style={styles.container}>
       
@@ -28,15 +28,17 @@ export default function FormLog({ activeTab, email, setEmail, password, setPassw
       
       {activeTab === 'registro' && (
         <>
-          <Text style={styles.label}>Teléfono</Text>
+          {/* CÓMO: Cambiar el campo de Teléfono por Nombre Completo. */}
+          {/* POR QUÉ: Satisface los requerimientos de datos requeridos por la ruta POST /api/auth/register de la API. */}
+          <Text style={styles.label}>Nombre Completo</Text>
           <TextInput
             style={styles.input}
-            placeholder="985586982"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="numeric"
+            placeholder="Ej. Aaron Rojas"
+            placeholderTextColor="#BDBDBD"
+            value={nombre}
+            onChangeText={setNombre}
+            autoCapitalize="words"
           />
-
         </>
       )}
       

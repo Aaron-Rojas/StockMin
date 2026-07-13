@@ -1,18 +1,34 @@
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import React from 'react';
+import { COLORS } from '../../themes/colors';
 
-export default function ConfirmButton({ onPress, title }) {
-    title = 'Confirmar';
+export default function ConfirmButton({ onPress, title, loading, disabled }) {
+  const label = title || 'Confirmar';
+  const estaDeshabilitado = loading || disabled;
+
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{title}</Text>
+    <TouchableOpacity 
+      style={[
+        styles.button, 
+        estaDeshabilitado && styles.buttonDisabled
+      ]} 
+      onPress={onPress}
+      disabled={estaDeshabilitado}
+    >
+      {loading ? (
+        // CÓMO: Cargar ActivityIndicator en lugar de texto al estar en modo de carga.
+        // POR QUÉ: Otorga retroalimentación visual óptima y evita que el usuario realice múltiples clics.
+        <ActivityIndicator size="small" color="#FFFFFF" />
+      ) : (
+        <Text style={styles.text}>{label}</Text>
+      )}
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#2A0005', 
+    backgroundColor: COLORS.secondary, 
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 25,
@@ -20,6 +36,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center', 
     marginTop: 20,
     elevation: 3,
+    minWidth: 150, // Evita variaciones bruscas de ancho al cambiar a cargando
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   text: {
     color: '#FFFFFF',
