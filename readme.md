@@ -194,9 +194,16 @@ La aplicación cuenta con un archivo `eas.json` en la raíz del proyecto configu
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://stockmin-backend.onrender.com"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://stockmin-backend.onrender.com"
+      }
+    }
   },
   "submit": {
     "production": {}

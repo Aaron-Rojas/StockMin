@@ -16,24 +16,19 @@ export default function FormIngreso({
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
-  // ANÁLISIS CRÍTICO: Anteriormente, onScanPress llamaba a una alerta provisional que simulaba el escaneo.
-  // En producción, esto es inviable y propenso a fallas. Ahora encapsulamos el manejo de permisos y la cámara
-  // directamente en el formulario para asegurar una experiencia de usuario fluida e integrada con el hardware.
+  
 
-  // CÓMO: Implementar una función asíncrona para validar y solicitar los permisos de la cámara de Expo.
-  // POR QUÉ: Permite manejar de forma segura la denegación de permisos del sistema operativo y previene excepciones en tiempo de ejecución.
+  // Implementar una función asíncrona para validar y solicitar los permisos de la cámara de Expo.
+  // Permite manejar de forma segura la denegación de permisos del sistema operativo y previene excepciones en tiempo de ejecución.
   const handleScanPress = async () => {
-    // Si viene la prop onScanPress externa, la invocamos (por si se requiere tracking de analíticas, por ejemplo),
-    // pero el flujo principal del modal se resolverá de manera interna para consistencia.
+    // Si viene la prop onScanPress externa, la invocamos (por si se requiere tracking de analíticas
     if (onScanPress) {
       onScanPress();
     }
-
     if (!permission) {
       // Los permisos aún se están cargando
       return;
     }
-
     if (!permission.granted) {
       const permissionResponse = await requestPermission();
       if (!permissionResponse.granted) {
@@ -50,9 +45,8 @@ export default function FormIngreso({
     setModalVisible(true);
   };
 
-  // CÓMO: Callback al detectar exitosamente un código de barras.
-  // POR QUÉ: Desestructura explícitamente { data } para extraer el string y asignarlo, cerrando el modal. 
-  // La bandera 'scanned' evita llamadas duplicadas y lecturas repetidas mientras se desmonta el componente.
+  // Callback al detectar exitosamente un código de barras.
+  // Desestructura explícitamente { data } para extraer el string y asignarlo, cerrando el modal. 
   const handleBarcodeScanned = ({ data }) => {
     setScanned(true);
     if (data) {

@@ -6,8 +6,7 @@ export const useAuth = () => {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
 
-  // CÓMO: Realizar petición POST con email y password al endpoint de login.
-  // POR QUÉ: Autentica al empleado contra la base de datos de producción y obtiene el JWT y perfil.
+  // Autenticar al empleado contra la base de datos de producción y obtiene el JWT y perfil.
   const iniciarSesion = async (email, password) => {
     setCargando(true);
     setError(null);
@@ -15,8 +14,6 @@ export const useAuth = () => {
       const respuesta = await api.post('/api/auth/login', { email, password });
       const { token, user } = respuesta.data;
 
-      // CÓMO: Almacenar de forma segura el token y el email en SecureStore.
-      // POR QUÉ: Garantiza la persistencia encriptada de la sesión para futuras peticiones.
       await SecureStore.setItemAsync('usuarioToken', token);
       await SecureStore.setItemAsync('usuarioEmail', user.email);
       
@@ -30,8 +27,7 @@ export const useAuth = () => {
     }
   };
 
-  // CÓMO: Leer la sesión activa desde SecureStore de forma asíncrona.
-  // POR QUÉ: Permite verificar si existe un token persistido para auto-loguear al empleado.
+  // Leer la sesión activa desde SecureStore de forma asíncrona.
   const obtenerSesion = async () => {
     try {
       const token = await SecureStore.getItemAsync('usuarioToken');
@@ -45,8 +41,7 @@ export const useAuth = () => {
     }
   };
 
-  // CÓMO: Limpiar los registros de sesión en SecureStore y reiniciar estados.
-  // POR QUÉ: Asegura que al cerrar sesión se borren las credenciales de memoria de forma irreversible.
+  // Limpiar los registros de sesión en SecureStore y reiniciar estados.
   const cerrarSesion = async () => {
     try {
       await SecureStore.deleteItemAsync('usuarioToken');
