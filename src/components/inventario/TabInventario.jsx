@@ -1,6 +1,9 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
+import { COLORS } from '../../themes/colors';
 
+// CÓMO: Crear un selector de pestañas (Tab) interactivo para alternar la vista del historial.
+// POR QUÉ: SRP. Permite al usuario filtrar visualmente entre movimientos de entrada y salida sin recargas.
 export default function TabInventario({ activeTab, setActiveTab }) {
   return (
     <View style={styles.container}>
@@ -24,7 +27,7 @@ export default function TabInventario({ activeTab, setActiveTab }) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#4A1C20',
+    backgroundColor: COLORS.secondary,
     borderRadius: 25,
     marginHorizontal: 40,
     marginBottom: 30,
@@ -37,7 +40,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeBg: {
-    backgroundColor: '#B70000',
+    backgroundColor: COLORS.primary,
   },
   inactiveBg: {
     backgroundColor: 'transparent',

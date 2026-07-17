@@ -1,22 +1,17 @@
-import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import React,{useState,useEffect} from 'react';
 import { useAuth } from '../hooks/useAuth.js';
+import { useProductos } from '../hooks/useProductos.js';
 
-import VentasDia from '../components/home/VentasDia.jsx';
 import FastButtons from '../components/ui/FastButtons.jsx';
 import ViewStock from '../components/products/ViewStock.jsx';
+import { COLORS } from '../themes/colors.js';
 
 export default function HomeScreen({ navigation }) {
   
   const [usuario, setUsuario] = useState('');
   const { obtenerSesion, cerrarSesion } = useAuth();
-
-  const listaProductos = [
-    { nombre: 'Agua', cantidad: '3' },
-    { nombre: 'Chanka', cantidad: '2' },
-    { nombre: 'Camacho', cantidad: '1' },
-  ];
-
+  const { alertasStock, loadingAlertas, cargarAlertas } = useProductos();
 
   useEffect(() => {
     const cargarUsuario = async () => {
@@ -24,6 +19,7 @@ export default function HomeScreen({ navigation }) {
       if (emailGuardado) setUsuario(emailGuardado);
     };
     cargarUsuario();
+    cargarAlertas();
   }, []);
 
   const manejarLogout = async () => {
@@ -36,7 +32,7 @@ export default function HomeScreen({ navigation }) {
       
       <View style={styles.headerBar}>
         
-        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#4A1C20' }}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: COLORS.secondary }}>
           Hola, {usuario || 'Usuario'}
         </Text>
 
@@ -50,14 +46,27 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <VentasDia fecha="Miercoles, 22 Abril 2026" monto="70" />
+        
+        {/* Refactorización UI 1: Tarjeta interactiva de acceso a la bitácora */}
+        <TouchableOpacity 
+          style={styles.historyCard} 
+          onPress={() => console.log('Navegar a Auditoría / Historial')}
+        >
+          <Text style={styles.historyTitle}>Auditoría / Historial</Text>
+          <Text style={styles.historySubtitle}>Consultar bitácora de movimientos</Text>
+        </TouchableOpacity>
         
         <FastButtons 
           onIngreso={() => navigation.navigate('IngresoProducto')}
           onVentas={() => navigation.navigate('SalidaProducto')}
         />
 
-        <ViewStock productos={listaProductos} />
+        {/* Refactorización UI 2: Lista de stock crítico conectada a alertas reales y loader */}
+        {loadingAlertas ? (
+          <ActivityIndicator size="large" color={COLORS.primary} style={{ marginVertical: 30 }} />
+        ) : (
+          <ViewStock productos={alertasStock} />
+        )}
       </ScrollView>
       
     </SafeAreaView>
@@ -67,7 +76,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F4EFEA',
+    backgroundColor: COLORS.background,
   },
   headerBar: {
     flexDirection: 'row',
@@ -75,14 +84,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 40,
-    backgroundColor: '#F4EFEA',
-
+    backgroundColor: COLORS.background,
   },
   placeholder: {
     flex: 1,
   },
   logoutButton: {
-    backgroundColor: '#4A1C20',
+    backgroundColor: COLORS.secondary,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 10,
@@ -96,5 +104,25 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  historyCard: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 15,
+    paddingVertical: 20,
+    alignItems: 'center',
+    elevation: 3,
+    marginBottom: 25,
+    marginTop: 20,
+  },
+  historyTitle: {
+    color: COLORS.gold,
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  historySubtitle: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '500',
   }
 });

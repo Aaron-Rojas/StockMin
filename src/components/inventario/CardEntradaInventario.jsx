@@ -1,61 +1,42 @@
 import { View, Text, StyleSheet } from 'react-native';
 import React from 'react';
-import ListProductInventory from './ListProductInventory';
+import { COLORS } from '../../themes/colors';
 
-export default function CardEntradaInventario({ fechaDia, fechaMes, cantidadTotal, productos }) {
+// CÓMO: Crear un componente presentacional simplificado para logs de entrada.
+// POR QUÉ: SRP. Muestra el string plano de la descripción del movimiento y su marca temporal de auditoría.
+export default function CardEntradaInventario({ descripcion, fecha }) {
   return (
     <View style={styles.cardContainer}>
-      
-      <View style={styles.header}>
-        <Text style={styles.titleBold}>{fechaDia}, <Text style={styles.titleLight}>{fechaMes}</Text></Text>
-        <Text style={styles.subtitle}>Cantidad total: {cantidadTotal}</Text>
-      </View>
-
-      <View style={styles.listContainer}>
-        {productos.map((item, index) => (
-          <ListProductInventory 
-            key={index} 
-            nombre={item.nombre} 
-            cantidad={item.cantidad} 
-            hora={item.hora} 
-          />
-        ))}
-      </View>
-
+      <Text style={styles.fechaText}>{fecha}</Text>
+      <Text style={styles.descripcionText}>{descripcion}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: '#803B43', 
+    backgroundColor: '#FFFFFF',
     marginHorizontal: 20,
-    paddingBottom: 25,
-    elevation: 4,
-    marginBottom: 20,
-    borderRadius:20
-  },
-  header: {
-    padding: 20,
-  },
-  titleBold: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  titleLight: {
-    fontSize: 20,
-    fontWeight: 'normal',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#E0C8CB',
-    marginTop: 5,
-  },
-  listContainer: {
-    backgroundColor: '#D9D9D9', 
-    marginHorizontal: 15,
+    padding: 16,
     borderRadius: 15,
-    padding: 15,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    marginBottom: 12,
+    borderLeftWidth: 5,
+    borderLeftColor: '#2E6F40', // Verde para indicar entrada/ingreso
+  },
+  fechaText: {
+    fontSize: 12,
+    color: '#777',
+    marginBottom: 6,
+    fontWeight: 'bold',
+  },
+  descripcionText: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 20,
   }
 });

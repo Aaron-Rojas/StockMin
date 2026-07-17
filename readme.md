@@ -126,18 +126,52 @@ El archivo `api-contrato.json` funciona como un acuerdo técnico y de validació
     2.  **Manejo de Roles:** Extender la respuesta del login/registro para almacenar el rol del usuario (ej. `cajero`, `administrador`) y usarlo para bloquear accesos visuales en el enrutamiento de pestañas del frontend de forma dinámica.
     3.  **Encriptación de Información Sensible:** Evitar almacenar contraseñas o datos personales en el estado global o almacenamiento local común (como AsyncStorage). Toda credencial debe ser guardada exclusivamente de forma encriptada mediante `SecureStore` (Keychain en iOS / Keystore en Android).
 
+### 📊 Dashboard y Consolidado de Alertas (Módulo 2)
+*   **Propósito de la Funcionalidad:** Consolidar el panel principal del Minimarket "Todo Dar", inyectando las alertas de stock crítico y vencimiento del almacén (`GET /api/productos/alertas`) para reaccionar de manera visual antes de que ocurran quiebres de inventario o pérdidas de mercancía.
+*   **Componentes Clave Implementados:**
+    1.  [useProductos.js](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/hooks/useProductos.js) (ViewModel): Implementa la llamada al endpoint consolidado `/api/productos/alertas` y gestiona los estados de carga, errores y datos (`alertasStock`, `alertasVencimiento`). Mapea en el ViewModel la estructura del backend a las claves `{ nombre, cantidad }` consumidas por la vista.
+    2.  [HomeScreen.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/screens/HomeScreen.jsx) (Vista): Consume los estados de alerta, muestra un indicador animado (`ActivityIndicator`) nativo mientras los datos de red se resuelven, y actualiza la lista visual de stock del Dumb Component. Además, se reemplazó el widget de ventas por un botón interactivo de acceso a Auditoría.
+*   **💡 Buenas Prácticas de Escalabilidad:**
+    1.  **Paginación y Caché:** En el mediano plazo, si el catálogo crece sustancialmente, las alertas podrían paginarse o cachearse localmente en la sesión para evitar peticiones redundantes en cada regreso al Home.
+    2.  **Notificaciones Push Locales:** Utilizar librerías como `expo-notifications` para disparar notificaciones push locales en segundo plano cuando se detecten lotes próximos a vencer (3 días o menos), alertando al empleado sin necesidad de tener la app abierta.
+
+### 📦 Catálogo Comercial de Productos (Módulo 3)
+*   **Propósito de la Funcionalidad:** Permitir la consulta integral del catálogo de productos y la gestión del registro de fichas comerciales en el inventario. La creación de la ficha comercial inicializa el stock en 0 (`POST /api/productos`), inyectando campos obligatorios (`nombre`, `categoria`, `codigoBarras`, `precioBase`, `stockMinimo`) sin involucrar stock físico directo de lotes en esta etapa.
+*   **Componentes Clave Implementados:**
+    1.  [useProductos.js](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/hooks/useProductos.js) (ViewModel): Implementa `cargarProductos` (`GET /api/productos`), `crearProducto` (`POST /api/productos`) y `actualizarProducto` (`PUT /api/productos/:id`). Realiza un mapeo implícito convirtiendo `precioBase` del backend en `precio` para alimentar de manera compatible al Dumb Component `CardProduct` sin tocar su JSX. Además, dispara alertas nativas centralizadas en el Hook ante éxitos o fallos de negocio (400, 409).
+    2.  [ProductoScreen.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/screens/ProductoScreen.jsx) (Vista): Consume `productos` y la recarga nativa en foco (`focus` de React Navigation) para refrescar los datos al regresar. Añade una barra de búsqueda local con un filtro optimizado que busca por nombre, código de barras y categoría en memoria.
+*   **💡 Buenas Prácticas de Escalabilidad:**
+    1.  **Mapeo de Tipos y Campos:** Mapear en una capa de transformación interna del cliente API o del Hook los nombres de los atributos de red (`precioBase` -> `precio`) ayuda a mantener desacoplado el frontend y previene que cambios menores de bases de datos afecten decenas de componentes de la vista.
+    2.  **Cámara y Escaneo Integrado:** Enlazar la búsqueda de productos comercialmente con el callback de escaneo en la barra de búsqueda para que, al detectar un código de barras de catálogo, se autocomplete el filtro de forma inmediata.
+
+### 🗄️ Gestión de Lotes e Ingreso Físico (Módulo 4)
+*   **Propósito de la Funcionalidad:** Habilitar el ingreso físico de mercancía al almacén mediante lotes (`POST /api/lotes`). Implementa un flujo inteligente de dos pasos en base al código de barras:
+    1.  Si el producto ya existe en el catálogo comercial, se inactiva la edición de metadatos (nombre, precio, categoría) y se permite la creación directa del lote físico del producto seleccionado.
+    2.  Si el producto no existe, se habilitan todos los campos para permitir registrar la ficha comercial (`POST /api/productos`) y, de forma encadenada y automática, se crea el lote físico inicial.
+    *   **Gestión de Vencimiento Automática:** Para resguardar la consistencia y no alterar la interfaz visual, el hook inyecta automáticamente una fecha de vencimiento configurada a **+6 meses** a partir del día actual.
+*   **Componentes Clave Implementados:**
+    1.  [useProductos.js](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/hooks/useProductos.js) (ViewModel): Implementa `registrarLote(productoId, cantidad)` inyectando la fecha de vencimiento a +6 meses. Optimiza `crearProducto` para bifurcar de forma inteligente el flujo y encadenar las llamadas si es un producto nuevo. Dispara alertas nativas centralizadas de éxito o error.
+    2.  [FormIngreso.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/components/forms/FormIngreso.jsx) (Vista): Implementa el formulario interactivo con campos de Categoría y Stock Mínimo. Consume `buscarProductoPorCodigo` para autocompletar y deshabilitar los campos si el producto existe. Incorpora botón de búsqueda rápida manual con loader integrado.
+    3.  [IngresoProductoScreen.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/screens/IngresoProductoScreen.jsx) (Vista): Estructura las variables de estado e invoca la llamada de red unificada delegando la lógica de negocio al ViewModel.
+*   **💡 Buenas Prácticas de Escalabilidad:**
+    1.  **Auditoría de Lotes:** En etapas de producción avanzada, se recomienda expandir el payload del lote para incluir el costo unitario de compra y el ID del proveedor, permitiendo evaluar la rentabilidad del stock ingresado.
+    2.  **Fechas Dinámicas:** Permitir en el futuro que productos perecibles (lácteos, embutidos) exijan fecha de vencimiento manual, mientras que productos no perecibles (plásticos, licores) utilicen el cálculo por defecto de +6 o +12 meses de vencimiento.
+
+### 💳 Registro de Ventas POS (Módulo 5)
+*   **Propósito de la Funcionalidad:** Permitir al cajero registrar ventas multiproducto en tiempo real (`POST /api/ventas`), descontando inventario en base a la fecha de vencimiento de lotes más próxima y simulando métodos de cobro en Efectivo o Yape.
+*   **Componentes Clave Implementados:**
+    1.  [useMovimientos.js](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/hooks/useMovimientos.js) (ViewModel): Implementa `registrarVenta(payload)`. Maneja de manera centralizada la latencia y las alertas nativas (ej. error 400 "Stock Insuficiente" o éxito "Venta Exitosa").
+    2.  [ModalPago.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/components/salida/ModalPago.jsx) (Componente de UI): Modal autocontenido para seleccionar el método de pago ("Efectivo" o "Yape"). Si es "Yape", renderiza un código QR simulado dinámicamente con cuadros nativos y colores de marca.
+    3.  [FormVenta.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/components/forms/FormVenta.jsx) (Componente de UI): Transmutado en el Carrito de Compras interactivo. Muestra la lista de ítems, controles incrementales/decrementales (`+` / `-`), precio unitario, opción de eliminar del carrito y totalizador a pagar.
+    4.  [SalidaProductoScreen.jsx](file:///c:/Proyectos/Universidad/Ciclo_8/StockMin/src/screens/SalidaProductoScreen.jsx) (Vista): Integra el filtrado de catálogo de productos en tiempo real, permite añadir sugerencias seleccionadas al carrito de compras, y gatilla secuencialmente el Modal de Pago y la confirmación en el hook.
+*   **💡 Buenas Prácticas de Escalabilidad:**
+    1.  **Impresión de Boleta Térmica:** Habilitar una integración bluetooth/wifi de bajo nivel para disparar la impresión automática de un ticket de venta en una ticketera térmica tras registrar exitosamente el movimiento.
+    2.  **Soporte Multi-caja offline:** Cachear localmente las ventas en un array de SQLite si no hay conexión de red y sincronizarlas por lotes cuando se restablezca el servicio de internet.
+
 ### 📷 Funcionalidad de Cámara y Código de Barras
 * **Ruta de Búsqueda (`GET /api/productos/barcode/{barcode}`):** Permite buscar rápidamente un producto escaneado mediante la cámara. Si no se encuentra, retorna un error `404 Not Found`.
 * **Ruta de Registro (`POST /api/productos`):** Permite registrar un producto nuevo de forma ágil asociando directamente el código de barras detectado por el dispositivo físico.
 * **Integración en Formulario (`FormIngreso.jsx`):** Integra la funcionalidad de escaneo de códigos de barra mediante la cámara nativa utilizando la versión moderna de `expo-camera` (SDK 50+) a través de `<CameraView>`. La gestión de permisos se realiza dinámicamente utilizando el hook `useCameraPermissions()`. Además, el callback `onBarcodeScanned` extrae de manera explícita el string de la propiedad `data` para guardarlo en el estado del formulario, garantizando la consistencia del tipo de dato según lo establecido en `api-contrato.json`.
-
-
-### 📦 Gestión de Movimientos de Inventario (Entradas/Salidas)
-* **Ruta de Listado (`GET /api/movimientos`):** Obtiene los movimientos de inventario agrupados por día para alimentar directamente las vistas de historial en la aplicación. Soporta un parámetro de consulta `?tipo=entrada` o `?tipo=salida` para filtrar las transacciones.
-  * **Estructura Esperada por el Frontend:** Retorna un arreglo de objetos agrupados por día con los campos `fechaDia` (ej. "Hoy"), `fechaMes` (ej. "22 de Abril"), `cantidadTotal` y una lista de `productos` con sus detalles individuales (`nombre`, `cantidad`, `hora`), que encaja de forma directa en las props requeridas por [InventarioScreen.jsx]
-* **Ruta de Registro (`POST /api/movimientos`):** Registra una entrada (ingreso) o salida (venta/merma) de un producto.
-  * **Cuerpo de Petición (`request`):** Exige obligatoriamente `tipo` ("entrada" o "salida"), `cantidad` (mínimo 1) y `productoId`. En el caso de ingresos, acepta de forma opcional el campo `proveedor` capturado en [IngresoProductoScreen.jsx]
-  * **Captura de Usuario de Sesión:** El ID del usuario que registra el movimiento se extrae de manera segura en el backend a partir del token JWT enviado en el header `Authorization`, cumpliendo con estándares de seguridad al no requerir el `usuarioId` en el cuerpo de la petición.
 
 ### ⚙️ Configuración y Variables de Entorno (`.env`)
 Para desacoplar el entorno de desarrollo y producción y ocultar las URLs de la futura API, se deben utilizar variables de entorno.

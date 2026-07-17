@@ -7,19 +7,40 @@ import CardEntradaInventario from '../components/inventario/CardEntradaInventari
 import CardSalidaInvetario from '../components/inventario/CardSalidaInvetario';
 
 import { useMovimientos } from '../hooks/useMovimientos';
+import { COLORS } from '../themes/colors';
 
 export default function InventarioScreen({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('entrada');
 
-  // CÓMO: Extraer el historial, el estado cargando, el estado de error y cargarHistorial de useMovimientos.
-  // POR QUÉ: Permite sincronizar y consultar dinámicamente las transacciones según la pestaña seleccionada.
+  // CÓMO: Extraer el historial y cargarHistorial de useMovimientos.
+  // POR QUÉ: Permite recuperar la lista plana de auditoría de movimientos del backend.
   const { historial, cargando, error, cargarHistorial } = useMovimientos();
 
-  // CÓMO: Ejecutar cargarHistorial cada vez que el usuario cambia entre la pestaña de entradas y salidas.
-  // POR QUÉ: Mantiene la lista limpia y solicita únicamente los datos que el usuario desea auditar.
+  // CÓMO: Consultar el listado completo de movimientos cada vez que la pestaña cambie.
+  // POR QUÉ: Ciclo de vida dinámico. Garantiza que el usuario reciba datos actualizados y sincronizados tras cualquier transacción en el POS.
   useEffect(() => {
-    cargarHistorial(activeTab);
+    cargarHistorial();
   }, [activeTab]);
+
+  // CÓMO: Formatear de forma robusta la fecha del backend en la zona horaria de Perú (America/Lima).
+  // POR QUÉ: Estandariza la fecha no ISO del backend (reemplaza espacios por 'T' e inyecta la 'Z' de UTC) para evitar quiebres de parseo en dispositivos móviles.
+  const formatearFechaPeru = (fechaString) => {
+    if (!fechaString) return '';
+    const fechaISO = fechaString.includes('T') ? fechaString : fechaString.replace(' ', 'T') + 'Z';
+    const fechaObjeto = new Date(fechaISO);
+    
+    return new Intl.DateTimeFormat('es-PE', {
+      timeZone: 'America/Lima',
+      dateStyle: 'short',
+      timeStyle: 'short',
+      hour12: true
+    }).format(fechaObjeto);
+  };
+
+  // CÓMO: Derivar las listas filtradas de entradas y salidas localmente de forma defensiva con trim().
+  // POR QUÉ: Previene fallos por espacios en blanco ocultos en los strings de base de datos.
+  const entradas = (historial || []).filter(item => item.tipo?.trim() === 'INGRESO_LOTE');
+  const salidas = (historial || []).filter(item => item.tipo?.trim() === 'VENTA' || item.tipo?.trim() === 'MERMA');
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -34,34 +55,42 @@ export default function InventarioScreen({ onNavigate }) {
         />
 
         {cargando && (
-          <ActivityIndicator size="large" color="#803B43" style={{ marginVertical: 20 }} />
+          <ActivityIndicator size="large" color={COLORS.primary} style={{ marginVertical: 20 }} />
         )}
 
         {error && (
           <Text style={styles.errorText}>{error}</Text>
         )}
 
-        {/* CÓMO: Mapear el historial dinámico recibido de la API para renderizar las tarjetas. */}
-        {/* POR QUÉ: Permite pintar múltiples días de transacciones reales sin alterar las propiedades o estilos del Dumb Component. */}
-        {!cargando && !error && activeTab === 'entrada' && historial.map((diaInfo, idx) => (
-          <CardEntradaInventario 
-            key={idx}
-            fechaDia={diaInfo.fechaDia} 
-            fechaMes={diaInfo.fechaMes} 
-            cantidadTotal={diaInfo.cantidadTotal} 
-            productos={diaInfo.productos} 
-          />
-        ))}
+        {/* Renderizado de entradas */}
+        {!cargando && !error && activeTab === 'entrada' && (
+          entradas.length === 0 ? (
+            <Text style={styles.emptyText}>No hay registros de ingreso físico.</Text>
+          ) : (
+            entradas.map((item) => (
+              <CardEntradaInventario 
+                key={item.id}
+                descripcion={item.descripcion}
+                fecha={formatearFechaPeru(item.fecha)}
+              />
+            ))
+          )
+        )}
 
-        {!cargando && !error && activeTab === 'salida' && historial.map((diaInfo, idx) => (
-          <CardSalidaInvetario
-            key={idx}
-            fechaDia={diaInfo.fechaDia} 
-            fechaMes={diaInfo.fechaMes} 
-            cantidadTotal={diaInfo.cantidadTotal} 
-            productos={diaInfo.productos}        
-          />      
-        ))}
+        {/* Renderizado de salidas */}
+        {!cargando && !error && activeTab === 'salida' && (
+          salidas.length === 0 ? (
+            <Text style={styles.emptyText}>No hay registros de salidas comerciales.</Text>
+          ) : (
+            salidas.map((item) => (
+              <CardSalidaInvetario
+                key={item.id}
+                descripcion={item.descripcion}
+                fecha={formatearFechaPeru(item.fecha)}
+              />      
+            ))
+          )
+        )}
 
       </ScrollView>
 
@@ -72,7 +101,7 @@ export default function InventarioScreen({ onNavigate }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F4EFEA', 
+    backgroundColor: COLORS.background, 
   },
   scrollContainer: {
     paddingBottom: 20,
@@ -84,5 +113,12 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     fontSize: 14,
     paddingHorizontal: 20,
+  },
+  emptyText: {
+    color: '#888',
+    textAlign: 'center',
+    marginVertical: 30,
+    fontStyle: 'italic',
+    fontSize: 14,
   }
 });
